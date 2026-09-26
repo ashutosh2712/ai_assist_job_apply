@@ -86,12 +86,30 @@ SALARY_WEIGHT = 0.4
 # A basic skills vocabulary. In the real version this could be a much larger
 # curated list, or dynamically extracted via an LLM.
 SKILLS_VOCAB = [
-    "python", "sql", "postgres", "tailwind", "react", "kafka",
-    "unit testing", "machine learning", "redis", "aws", "s3",
-    "lambda", "ec2", "scala", "html", "css",
-    "llm", "node", "mysql", "leadership",
+    # Languages
+    "python", "javascript", "typescript", "c++", "java", "scala", "c#",
+    # Frontend
+    "html", "css", "tailwind", "react", "reactjs", "react.js", "next.js",
+    "nextjs", "three.js", "threejs", "gsap", "redux", "zustand",
+    "backbone.js", "backbone", "bootstrap",
+    # Backend
+    "django", "fastapi", "flask", "node.js", "nodejs", "express",
+    "rest api", "restful", "graphql", "grpc", "low level design", "lld",
+    "system design", "microservices",
+    # Databases
+    "postgresql", "postgres", "mysql", "sql server", "mongodb", "sqlite",
+    "sqlalchemy", "pgpool",
+    # Cloud / DevOps
+    "aws", "gcp", "azure", "docker", "kubernetes", "git", "bitbucket",
+    "linux", "aws lambda", "cdk", "route 53", "cloud sql", "ci/cd",
+    # Messaging / Search / Monitoring
+    "kafka", "elasticsearch", "kibana", "elk",
+    # Third-party integrations
+    "openai", "stripe", "twilio", "anthrophic"
+    # Practices
+    "rbac", "data structures", "algorithms", "problem solving",
+    "unit testing", "code review", "agile", "scrum",
 ]
-
 
 def extract_skills(text: str) -> set:
     """Extract known skills mentioned in a block of text (case-insensitive)."""

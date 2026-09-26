@@ -50,23 +50,68 @@ ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID", "")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")
 
 ADZUNA_COUNTRY = "in"          # 'in' = India. Adzuna supports gb, us, in, au, etc.
-SEARCH_KEYWORDS = "software engineer"
-SEARCH_LOCATION = "bangalore"
+
+SEARCH_KEYWORDS = [
+    "software engineer", "backend engineer", "senior software engineer",
+    "senior backend engineer", "sde1", "sde2", "software developer",
+    "senior software developer", "full stack developer",
+    "senior full stack developer",
+]
+
+# SEARCH_LOCATIONS = ["bangalore", "bengaluru", "hyderabad", "gurugram", "pune"] # Adzuna needs one location per call — this list is looped over
+
+SEARCH_LOCATIONS = ["bangalore"]
 RESULTS_PER_PAGE = 20
 NUM_PAGES = 1                  # increase to fetch more listings
 
 DESIRED_SALARY = 2800000       # INR per annum — set your target
 
 MY_RESUME = """
-    With 4+ years of professional experience, 
-    my journey has taken me from building full-stack applications 
-    at Intel to working on SaaS platforms, cloud infrastructure, 
-    and scalable systems. Over the years, I’ve grown from developing 
-    web applications to designing microservices, serverless architectures, 
-    APIs, and cloud solutions, working across technologies like React, Python, 
-    Scala, Node.js, AWS, GCP, and Docker. Today, I focus on solving complex 
-    engineering problems and building scalable, reliable, production-ready systems.
-"""  # resume in text
+Ashutosh Kumar Roy — Software Engineer
+ 
+SKILLS
+Programming Languages: Python, JavaScript, C++, C, Java, Scala
+Web Development — Front-end: HTML, CSS, Tailwind, TypeScript, ReactJs, NextJs,
+ThreeJs, GSAP, Redux, Zustand
+Web Development — Back-end: Django, FastAPI, Flask, NodeJS, Scala, REST API,
+GraphQL, LLD
+Database: PostgreSQL, MySQL, SQL Server, MongoDB, SQLite
+Tools: AWS Cloud, GCP Cloud, Git, Linux, Docker, Bitbucket, Apache Kafka,
+gRPC, Elasticsearch, OpenAI
+ 
+EXPERIENCE
+Software Engineer, Konovo Private Limited (July 2025 - Present)
+Developed and maintained full-stack applications using Backbone.js, React.js,
+Scala, and Node.js, implementing RBAC, UI rebranding, feature enhancements,
+bug fixes, and AWS Lambda services. Designed AWS infrastructure using CDK,
+added UAT coverage, and used ELK/Kibana for production monitoring. Optimized
+a client-facing search feature by fixing N+1 query issues and missing
+database indexes, reducing response time from 5 minutes to a few seconds.
+ 
+Full Stack Developer, Ethan.ai Private Limited (August 2024 - July 2025)
+Led integration of a merged company's project, designing the Low-Level
+Design (LLD) to incorporate their codebase. Migrated applications
+(ASP.NET + SQL Server and Flask + MySQL) into Next.js, Django + FastAPI,
+PostgreSQL stack, handling database migration, GCP deployment, and AWS
+Route 53 domain mapping. Redesigned 100+ APIs. Migrated another application
+to Azure infrastructure. Optimized database scalability using Pgpool while
+mentoring junior developers and conducting code reviews.
+ 
+Full Stack Developer, Accenflair Pvt Ltd (January 2024 - August 2024)
+Integrated Kafka, Twilio, Elasticsearch, and Kibana into SaaS applications.
+Implemented email, SMS, and WhatsApp notification systems. Built UIs with
+React and Redux. Implemented Stripe payment integration and designed
+GraphQL endpoints. Used gRPC for microservice communication.
+ 
+Full Stack Developer, INTEL (July 2022 - June 2023)
+Developed a full-stack dashboard application using HTML, CSS, Bootstrap,
+JavaScript, Python Flask, SQLAlchemy, and PostgreSQL for workload-oriented
+product planning.
+ 
+EDUCATION
+M.Tech, Computer Science and Engineering, NIT Hamirpur (2021-2023)
+B.Tech, Computer Science and Engineering, UTU Dehradun (2016-2020)
+"""  # <-- feel free to trim/expand further
 
 
 # ---------------------------------------------------------------------------
@@ -112,6 +157,40 @@ def fetch_adzuna_jobs(app_id, app_key, country, keywords, location,
                 "url": item.get("redirect_url", ""),
             })
 
+    return all_jobs
+
+
+
+def fetch_adzuna_jobs_multi(app_id, app_key, country, keywords, locations,
+                             results_per_page=20, num_pages=1):
+    """
+    Adzuna's API takes one 'where' location per call, so to search several
+    cities at once, this loops over `locations` and merges the results,
+    de-duplicating by URL (falling back to title+company if URL is missing).
+
+    `keywords` and `locations` can each be a single string or a list of
+    strings — both get normalized to lists internally.
+    """
+
+    if isinstance(keywords, str):
+        keywords = [keywords]
+    if isinstance(locations, str):
+        locations = [locations]
+
+    all_jobs = []
+    seen = set()
+ 
+    for keyword in keywords:
+        for location in locations:
+            jobs = fetch_adzuna_jobs(app_id, app_key, country, keyword, location,
+                                      results_per_page, num_pages)
+            for job in jobs:
+                key = job.get("url") or f"{job.get('title','')}|{job.get('company','')}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                all_jobs.append(job)
+ 
     return all_jobs
 
 
@@ -179,9 +258,9 @@ if __name__ == "__main__":
         print("       Get free credentials at https://developer.adzuna.com/\n")
         results = rank_jobs_live(MY_RESUME, DEMO_JOBS, DESIRED_SALARY)
     else:
-        live_jobs = fetch_adzuna_jobs(
+        live_jobs = fetch_adzuna_jobs_multi(
             ADZUNA_APP_ID, ADZUNA_APP_KEY, ADZUNA_COUNTRY,
-            SEARCH_KEYWORDS, SEARCH_LOCATION,
+            SEARCH_KEYWORDS, SEARCH_LOCATIONS,
             RESULTS_PER_PAGE, NUM_PAGES,
         )
         if not live_jobs:
