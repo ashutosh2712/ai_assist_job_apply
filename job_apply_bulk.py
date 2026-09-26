@@ -54,14 +54,14 @@ CLAUDE_MODEL = "claude-sonnet-5"  # check docs.claude.com for current model name
 # --- Your filter criteria ---
 MIN_ACCEPTABLE_SALARY = 1500000   # INR per annum — your floor, from ₹15L–25L range
 MY_YEARS_EXPERIENCE = 4.5        # midpoint of your 2-5 years — set your exact number
-EXPERIENCE_BUFFER = 5           # how many extra years of "required" you'll still consider
+EXPERIENCE_BUFFER = 0          # how many extra years of "required" you'll still consider
 
 # Optional: exclude/include specific companies. Leave empty to skip.
 COMPANY_BLOCKLIST = []   # e.g. ["Some Company Name"]
 COMPANY_ALLOWLIST = []   # if non-empty, ONLY these companies are kept
 
 # Safety cap on API spend — raise if you want more drafts per run
-MAX_DRAFTS = 1
+MAX_DRAFTS = 6
 
 # Where the application tracking log lives — same folder as this script
 APPLICATIONS_LOG_PATH = "applications_log.csv"
@@ -264,7 +264,7 @@ present in the resume. End with a simple, confident closing line."""
         text_blocks = [b.text for b in response.content if getattr(b, "type", None) == "text"]
         return text_blocks[0].strip() if text_blocks else "[No text content returned]"
     except Exception as e:
-        return f"[Draft generation failed: {e}]"
+        return f"[Draft generation failed❌: {e}]"
 
 
 # ---------------------------------------------------------------------------
@@ -272,6 +272,7 @@ present in the resume. End with a simple, confident closing line."""
 # ---------------------------------------------------------------------------
 
 def write_report(passed_jobs, filepath):
+    print("Generating reports...🕐")
     lines = []
     lines.append(f"# Bulk Apply List — {datetime.now().strftime('%Y-%m-%d')}\n")
     lines.append(f"Filters: salary floor ₹{MIN_ACCEPTABLE_SALARY:,} | "
@@ -307,6 +308,10 @@ if __name__ == "__main__":
         if not jobs:
             print("[Info] No live jobs fetched — using demo data instead.")
             jobs = DEMO_JOBS
+
+        for job in jobs:
+            print("Fetching jobs...Wait🕐")
+            
     else:
         print("[Info] No Adzuna credentials — using demo data instead.")
         jobs = DEMO_JOBS
@@ -316,6 +321,7 @@ if __name__ == "__main__":
     # 2. Apply filters
     passed = []
     for job in jobs:
+        print("Fetching jobs...Wait🕐")
         company = job.get("company", "Unknown")
         if not passes_company_filter(company):
             continue
@@ -344,8 +350,8 @@ if __name__ == "__main__":
             "draft": None,
         })
 
-    print(f"{len(passed)} of {len(jobs)} jobs passed your filters.")
-    print("Resolving application destinations (this makes one request per job)...")
+    print(f"{len(passed)} of {len(jobs)} jobs passed your filters🎉.")
+    print("Resolving application destinations (this makes one request per job)🔄...")
 
     # 3. Draft cover letters for everything that passed (up to MAX_DRAFTS)
     if not ANTHROPIC_API_KEY:
@@ -355,8 +361,11 @@ if __name__ == "__main__":
     else:
         client = Anthropic(api_key=ANTHROPIC_API_KEY)
         to_draft = passed[:MAX_DRAFTS]
+        
         print(f"Generating {len(to_draft)} cover letter draft(s)...")
-        for item in to_draft:
+
+        for index, item in enumerate(to_draft, start=1):
+            print(f"Generating {index} cover letter draft ✅")
             item["draft"] = generate_cover_letter(
                 client, MY_RESUME, item["title"], item["company"], item["matched_skills"]
             )
@@ -367,7 +376,7 @@ if __name__ == "__main__":
     # 4. Write report
     out_path = f"bulk_apply_{datetime.now().strftime('%Y-%m-%d')}.md"
     write_report(passed, out_path)
-    print(f"\nDone. Report written to: {out_path}")
+    print(f"\nDone✅. Report written to: {out_path}")
 
     # 5. Log to the persistent CSV tracker (skips duplicates automatically)
     log_to_csv(passed)

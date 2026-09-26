@@ -51,11 +51,15 @@ ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")
 
 ADZUNA_COUNTRY = "in"          # 'in' = India. Adzuna supports gb, us, in, au, etc.
 
+# SEARCH_KEYWORDS = [
+#     "software engineer", "backend engineer", "senior software engineer",
+#     "senior backend engineer", "sde1", "sde2", "software developer",
+#     "senior software developer", "full stack developer",
+#     "senior full stack developer",
+# ]
+
 SEARCH_KEYWORDS = [
-    "software engineer", "backend engineer", "senior software engineer",
-    "senior backend engineer", "sde1", "sde2", "software developer",
-    "senior software developer", "full stack developer",
-    "senior full stack developer",
+    "software engineer"
 ]
 
 # SEARCH_LOCATIONS = ["bangalore", "bengaluru", "hyderabad", "gurugram", "pune"] # Adzuna needs one location per call — this list is looped over

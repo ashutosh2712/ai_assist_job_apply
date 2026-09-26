@@ -120,6 +120,8 @@ def extract_skills(text: str) -> set:
         pattern = r"(?<![a-z0-9])" + re.escape(skill) + r"(?![a-z0-9])"
         if re.search(pattern, text_lower):
             found.add(skill)
+
+    print("Extracted skill succefully✅")
     return found
 
 
