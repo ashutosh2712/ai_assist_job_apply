@@ -121,7 +121,6 @@ def extract_skills(text: str) -> set:
         if re.search(pattern, text_lower):
             found.add(skill)
 
-    print("Extracted skill succefully✅")
     return found
 
 
