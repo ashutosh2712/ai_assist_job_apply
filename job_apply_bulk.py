@@ -54,17 +54,18 @@ CLAUDE_MODEL = "claude-sonnet-5"  # check docs.claude.com for current model name
 # --- Your filter criteria ---
 MIN_ACCEPTABLE_SALARY = 1500000   # INR per annum — your floor, from ₹15L–25L range
 MY_YEARS_EXPERIENCE = 4.5        # midpoint of your 2-5 years — set your exact number
-EXPERIENCE_BUFFER = 0          # how many extra years of "required" you'll still consider
+EXPERIENCE_BUFFER = 5         # how many extra years of "required" you'll still consider
 
 # Optional: exclude/include specific companies. Leave empty to skip.
 COMPANY_BLOCKLIST = []   # e.g. ["Some Company Name"]
 COMPANY_ALLOWLIST = []   # if non-empty, ONLY these companies are kept
 
 # Safety cap on API spend — raise if you want more drafts per run
-MAX_DRAFTS = 6
+MAX_DRAFTS = 30
 
 # Where the application tracking log lives — same folder as this script
-APPLICATIONS_LOG_PATH = "applications_log.csv"
+APPLICATIONS_LOG_PATH = f"applications_log_{datetime.now().strftime('%Y-%m-%d')}.csv"
+
 LOG_COLUMNS = [
     "Date Found", "Title", "Company", "Salary Note", "Experience Note",
     "Applies Via", "URL", "Status", "Date Applied", "Notes",
